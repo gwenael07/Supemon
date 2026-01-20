@@ -3,7 +3,8 @@
 
 Develop a C CLI game, Supémon, inspired by Pokémon. Players capture, battle, and train Supémons, manage items, earn Supcoins, and save progress. Includes turn-based combat, leveling, shops, and a Supémon Center. Groups of 2, 3 weeks, full source and docs required.
 
-<img width="500" height="260" alt="image" src="https://github.com/user-attachments/assets/b304b7c0-09d0-466a-afc7-3dd5dcc5ea92" />
+<img width="100" height="100" alt="image" src="https://github.com/user-attachments/assets/a514c037-311d-4cda-82d6-cbc2a273d5ae" />
+
 
 
 
