@@ -1,0 +1,30 @@
+Etapes d'entrée de l'utilisateur :
+    - Doit entrer son nom
+    - Choisit son starter (1,2 ou 3)
+    - Choisit le lieu où il veut aller (1,2,3 ou 4) :
+        - En 1 on va dans la forêt combattre un Supémon aléatoire
+        - En 2 on va dans la boutique. On peut :
+            - Acheter un objet (tous les articles seront affichés avec leur prix à côtés):
+                - Potions (+5pv) : 100 coins
+                - Superpotion (+10pv) : 300 coins
+                - Bonbon rare (ajoute un niveau au Supémon) : 700 coins
+            - Vendre un objet (tout notre inventaire sera affiché avec le prix de vente à côtés)
+        - En 3 on va au centre Supémon où l'on peut soigner ces Supémon gratuitement
+        - En 4 on quitte le jeu, avec un choix de sauvegarder ou non
+    Durant la bataille :
+        - Choisit le Supémon invoqué
+        - Pendant le tour du joueur :
+            - Attaque : choisit une attaque -> 1 par tour
+            - Changer de Supémon -> passe le tour
+            - Utiliser un objet -> 1 par tour et max 4 par combat
+            - Fuir : essayera de fuir avec un taux de chances de : player_speed/(player_speed+enemy_speed)
+            - Capture : essayera de capturer le Supémon adverse avec un taux de chances de : (pvmax_enemy - pv_enemy)/pvmax_enemy-0.5
+        Si le Supémon est capturé ou vaincu, le joueur gagne entre 100 et 500 Supcoins et le Supémon en jeu gagne entre 100 et 500 fois le niveau de l'adversaire en expérience
+    Expérience :
+        - A chaque niveau, toutes les stats augmentent de 30%
+        - Si la stat n'est pas un entier, 50% de chances arrondies au supérieur, sinon arrondies inférieur
+        Niveau 1 -> 2 : 500xp
+        Niveau 2 -> 3 : 1500xp
+        Niveau 3 -> 4 : 2500XP
+        etc en ajoutant 1000xp à chaque fois
+
