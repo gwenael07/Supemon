@@ -1,31 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+struct Player {
+    char name[50];
+    char team[6][20];
+    int nb_supemons;
+};
+
+struct Supemon {
+    char name[50];
+};
 
 int main() {
+    struct Player p;
+    p.nb_supemons = 0;
     printf("Hello and welcolme to Supemon game ! \n");
-    char name;
     printf("First of all, what's your name ?");
-    scanf("%s", &name);
-    printf("Hello %s!\n", &name);
+    scanf("%s", p.name);
+    printf("Hello %s!\n", p.name);
     printf("+--------------------------------+\n"
                  "|To begin, choose your starter : |\n"
-                 "|    1 - Bulbizarre              |\n"
-                 "|    2 - Salameche               |\n"
-                 "|    3 - Carapuce                |\n"
+                 "|    1 - Supmander               |\n"
+                 "|    2 - Supasaur                |\n"
+                 "|    3 - Supirtle                |\n"
                  "+--------------------------------+\n"
                  "1, 2 or 3 : ");
     int choice;
     scanf("%d", &choice);
     if (choice == 1) {
-        printf("Your starter is Bulbizarre !\n");
+        printf("Your starter is Supmander !\n");
+        strcpy (p.team[0], "Supmander");
     }
     if (choice == 2) {
-        printf("Your starter is Salameche !\n");
+        printf("Your starter is Supasaur !\n");
+        strcpy (p.team[0], "Supasaur");
     }
     if (choice == 3) {
-        printf("Your starter is Carapuce !\n");
+        printf("Your starter is Supirtle !\n");
+        strcpy (p.team[0], "Supirtle");
     }
+    p.nb_supemons = 1;
     printf("+------------------------------+\n"
                  "|Where do you want to go ?     |\n"
                  "|    1 - Into the Wild         |\n"
