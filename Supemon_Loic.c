@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 // Structure des compétences
 struct Competence {
     char name[20];
@@ -56,7 +57,128 @@ struct Player {
     int rare_candies;
 };
 
+
+struct Supemon supemon1 = {
+    "Supmander", 1, 0,
+    10, 10,
+    2, 2,
+    1, 1,
+    1, 1,
+    2, 2,
+    2,
+    {
+                {"Scratch", 3, "NONE", 0},
+                {"Growl",   0, "ATK",  1}
+    }
+};
+
+struct Supemon supemon2 = {
+    "Supasaur", 1, 0,
+    9, 9,
+    1, 1,
+    1, 1,
+    3, 3,
+    2, 2,
+    2,
+    {
+                {"Pound",   2, "NONE", 0},
+                {"Foliage", 0, "EVA",  1}
+    }
+};
+
+struct Supemon supemon3 = {
+    "Supirtle", 1, 0,
+    11, 11,
+    1, 1,
+    2, 2,
+    2, 2,
+    1, 1,
+    2,
+    {
+                {"Pound", 2, "NONE", 0},
+                {"Shell", 0, "DEF",  1}
+    }
+};
+
+struct Supemon supemon4 = {
+    "Supfox", 1, 0,
+    8, 8,
+    2, 2,
+    1, 1,
+    2, 2,
+    3, 3,
+    3,
+    {
+                {"Peck",  2, "NONE", 0},
+                {"Focus", 0, "ACC",  1}
+    }
+};
+
+struct Supemon supemon5 = {
+    "Suprock", 1, 0,
+    12, 12,
+    1, 1,
+    3, 3,
+    1, 1,
+    1, 1,
+    1,
+    {
+                {"Smash", 2, "NONE", 0},
+                {"Guard", 0, "DEF",  1}
+    }
+};
+
+struct Supemon supemon6 = {
+    "Supmind", 1, 0,
+    9, 9,
+    1, 1,
+    1, 1,
+    2, 2,
+    3, 3,
+    2,
+    {
+                {"Pulse",  2, "NONE", 0},
+                {"Focus",  0, "ACC",  1}
+    }
+};
+
+struct Supemon* create_random_enemy(struct Supemon *supemon_list, int count) {
+    int index = rand() % count;
+
+    struct Supemon *enemy = malloc(sizeof(struct Supemon));
+    if (!enemy) return NULL;
+
+    *enemy = supemon_list[index]; // Copie complÃ¨te (moves inclus)
+
+    return enemy;
+}
+
+
+int tentative_toucher(struct Supemon attaquant, struct Supemon cible) {
+
+    float proba = (float)attaquant.accuracy / (attaquant.accuracy + cible.evasion) + 0.1f;
+
+    float jet = (float)rand() / (float)RAND_MAX;
+
+    if (jet <= proba) {
+        return 1;
+    }
+    return 0;
+}
+
+
+
+
 int main() {
+    struct Supemon *all_supemons = malloc(6*  sizeof(struct Supemon));
+
+    all_supemons[0] = supemon1;
+    all_supemons[1] = supemon2;
+    all_supemons[2] = supemon3;
+    all_supemons[3] = supemon4;
+    all_supemons[4] = supemon5;
+    all_supemons[5] = supemon6;
+
 
     struct Player p;
     p.nb_supemons = 0;
@@ -187,68 +309,83 @@ int main() {
                 enemy.accuracy = 1; enemy.base_accuracy = 1;
                 enemy.speed = 2;
             }
-            int combat = 0;
+            int combat = 1;
+            int turn_p=1;
             printf("You go into the Wild!\n");
-            printf("A savage Supemon appears !\n");
-            while (combat == 0) {
-                printf("+----------------------------+\n"
-                             "|Where do you do ?           |\n"
-                             "|    1 - Attack              |\n"
-                             "|    2 - Change Supemon      |\n"
-                             "|    3 - Use an object       |\n"
-                             "|    4 - Run away            |\n"
-                             "|    5 - Capture the Supemon |\n"
-                             "+----------------------------+\n"
-                             "1, 2, 3, 4  or 5: ");
-                int battle;
-                scanf("%d", &battle);
-                int i = p.selected_supemon;
-                if (battle==1) {
-                    printf("+-----------------------------------+\n"
-                                 "|What attack do you want to launch? |\n"
-                                 "|     1 - %-26s|\n""|     2 - %-26s|\n"
-                                 "+-----------------------------------+\n"
-                                 "1 or 2 :", p.team[i].moves[0].name, p.team[i].moves[1].name);
-                    int attack;
-                    scanf("%d",&attack);
-                    if (attack == 1) {
+            printf("A %s appears !\n", enemy.name);
+            while (combat == 1) {
+                while (turn_p==1) {
+                    printf("+----------------------------+\n"
+                                 "|Where do you do ?           |\n"
+                                 "|    1 - Attack              |\n"
+                                 "|    2 - Change Supemon      |\n"
+                                 "|    3 - Use an object       |\n"
+                                 "|    4 - Run away            |\n"
+                                 "|    5 - Capture the Supemon |\n"
+                                 "+----------------------------+\n"
+                                 "1, 2, 3, 4  or 5: ");
+                    int battle;
+                    scanf("%d", &battle);
+                    int i = p.selected_supemon;
+                    if (battle==1) {
                         printf("+-----------------------------------+\n"
-                                     "|You make %-26s|\n",p.team[i].moves[0].name);
+                                     "|What attack do you want to launch? |\n"
+                                     "|     1 - %-26s|\n""|     2 - %-26s|\n"
+                                     "+-----------------------------------+\n"
+                                     "1 or 2 :", p.team[i].moves[0].name, p.team[i].moves[1].name);
+                        int attack;
+                        scanf("%d",&attack);
+                        if (attack == 1) {
+                            printf("+-----------------------------------+\n"
+                                         "|You make %-26s|\n",p.team[i].moves[0].name);
+                            if (tentative_toucher(p.team[i], enemy)) {
+                                int degats = p.team[i].moves[0].damage;
+                                enemy.hp -= degats;
+                                printf("BANG! %s lose %d HP.\n", enemy.name, degats);
+                                if (enemy.hp < 0) enemy.hp = 0;
+                                printf("Enemy HP remaining: %d/%d\n", enemy.hp, enemy.max_hp);
+                                turn_p = 0;
+                            } else {
+                                printf("| Missed! The enemy dodged it.      |\n");
+                            }
+                            printf("+-----------------------------------+\n");
+                        }
+                        if (attack == 2) {
+                            printf("+-----------------------------------+\n"
+                                         "|You make %-26s|\n",p.team[i].moves[1].name);
+                        }
                     }
-                    if (attack == 2) {
-                        printf("+-----------------------------------+\n"
-                                     "|You make %-26s|\n",p.team[i].moves[1].name);
+                    if (battle==2) {
+                        printf("+---------------------------------------+\n"
+                                     "|Which Supemon would you like to trade? |\n"
+                                     "|     1 - %-30s|\n"
+                                     "+---------------------------------------+\n",p.team[i].name);
                     }
-                }
-                if (battle==2) {
-                    printf("+---------------------------------------+\n"
-                                 "|Which Supemon would you like to trade? |\n"
-                                 "|     1 - %-30s|\n"
-                                 "+---------------------------------------+\n",p.team[i].name);
-                }
-                if (battle==3) {
-                    printf("+---------------------------------------+\n");
-                }
-                if (battle==4) {
-                    printf("+----------------------------------------+\n"
-                                 "|Are you sure you want to quit the fight?|\n"
-                                 "      1 - Yes !                          |\n"
-                                 "      2 - No !                           |\n"
-                                 "+----------------------------------------+\n"
-                                 "1 or 2 :");
-                    int leave;
-                    scanf("%d",&leave);
-                    if (leave == 1) {
+                    if (battle==3) {
+                        printf("+---------------------------------------+\n");
+                    }
+                    if (battle==4) {
+                        printf("+----------------------------------------+\n"
+                                     "|Are you sure you want to quit the fight?|\n"
+                                     "      1 - Yes !                          |\n"
+                                     "      2 - No !                           |\n"
+                                     "+----------------------------------------+\n"
+                                     "1 or 2 :");
+                        int leave;
+                        scanf("%d",&leave);
+                        if (leave == 1) {
 
+                        }
+                        if (leave == 2) {
+                            return 0;
+                        }
                     }
-                    if (leave == 2) {
-                        return 0;
+                    if (battle==5) {
+                        printf("+---------------------------------------+\n");
                     }
-                }
-                if (battle==5) {
-                    printf("+---------------------------------------+\n");
                 }
             }
+
         }
         //#####################################
         // 2 -        THE SHOP
@@ -324,7 +461,7 @@ int main() {
                     }
                 }
                 else if (shop_mode == 3) {
-                    shop_running = 0; 
+                    shop_running = 0;
                 }
             }
         }
