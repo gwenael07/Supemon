@@ -158,8 +158,97 @@ int main() {
         scanf("%d", &choice2);
 
         if (choice2 == 1) {
-            printf("\n--- Into the Wild (Not implemented yet) ---\n");
-            // Ta logique de combat...
+            struct Supemon enemy;
+            int type = rand()%3;
+            if (type == 0) {
+                strcpy(enemy.name, "Savage Supmander");
+                enemy.hp = 10; enemy.max_hp = 10;
+                enemy.attack = 1; enemy.base_attack = 1;
+                enemy.defense = 1; enemy.base_defense = 1;
+                enemy.evasion = 1; enemy.base_evasion = 1;
+                enemy.accuracy = 2; enemy.base_accuracy = 2;
+                enemy.speed = 1;
+                }
+            if (type == 1) {
+                strcpy(enemy.name,"Savage Supasaur");
+                enemy.hp =9; enemy.max_hp = 9;
+                enemy.attack=1; enemy.base_attack =1;
+                enemy.defense = 1; enemy.base_defense = 1;
+                enemy.evasion = 3; enemy.base_evasion = 3;
+                enemy.accuracy = 2; enemy.base_accuracy = 2;
+                enemy.speed = 2;
+            }
+            if (type == 2) {
+                strcpy(enemy.name,"Savage Supirtle");
+                enemy.hp =11; enemy.max_hp = 11;
+                enemy.attack=1; enemy.base_attack =1;
+                enemy.defense = 2; enemy.base_defense = 2;
+                enemy.evasion = 2; enemy.base_evasion = 2;
+                enemy.accuracy = 1; enemy.base_accuracy = 1;
+                enemy.speed = 2;
+            }
+            int combat = 0;
+            printf("You go into the Wild!\n");
+            printf("A savage Supemon appears !\n");
+            while (combat == 0) {
+                printf("+----------------------------+\n"
+                             "|Where do you do ?           |\n"
+                             "|    1 - Attack              |\n"
+                             "|    2 - Change Supemon      |\n"
+                             "|    3 - Use an object       |\n"
+                             "|    4 - Run away            |\n"
+                             "|    5 - Capture the Supemon |\n"
+                             "+----------------------------+\n"
+                             "1, 2, 3, 4  or 5: ");
+                int battle;
+                scanf("%d", &battle);
+                int i = p.selected_supemon;
+                if (battle==1) {
+                    printf("+-----------------------------------+\n"
+                                 "|What attack do you want to launch? |\n"
+                                 "|     1 - %-26s|\n""|     2 - %-26s|\n"
+                                 "+-----------------------------------+\n"
+                                 "1 or 2 :", p.team[i].moves[0].name, p.team[i].moves[1].name);
+                    int attack;
+                    scanf("%d",&attack);
+                    if (attack == 1) {
+                        printf("+-----------------------------------+\n"
+                                     "|You make %-26s|\n",p.team[i].moves[0].name);
+                    }
+                    if (attack == 2) {
+                        printf("+-----------------------------------+\n"
+                                     "|You make %-26s|\n",p.team[i].moves[1].name);
+                    }
+                }
+                if (battle==2) {
+                    printf("+---------------------------------------+\n"
+                                 "|Which Supemon would you like to trade? |\n"
+                                 "|     1 - %-30s|\n"
+                                 "+---------------------------------------+\n",p.team[i].name);
+                }
+                if (battle==3) {
+                    printf("+---------------------------------------+\n");
+                }
+                if (battle==4) {
+                    printf("+----------------------------------------+\n"
+                                 "|Are you sure you want to quit the fight?|\n"
+                                 "      1 - Yes !                          |\n"
+                                 "      2 - No !                           |\n"
+                                 "+----------------------------------------+\n"
+                                 "1 or 2 :");
+                    int leave;
+                    scanf("%d",&leave);
+                    if (leave == 1) {
+
+                    }
+                    if (leave == 2) {
+                        return 0;
+                    }
+                }
+                if (battle==5) {
+                    printf("+---------------------------------------+\n");
+                }
+            }
         }
         //#####################################
         // 2 -        THE SHOP
@@ -276,5 +365,6 @@ int main() {
 
     return 0;
 }
+
 
 
