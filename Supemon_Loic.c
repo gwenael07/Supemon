@@ -45,7 +45,7 @@ struct Supemon {
 // 2.3 - Structure du Joueur
 struct Player {
     char name[50];
-    struct Supemon team[6]; // Une équipe de vrais Supémons 
+    struct Supemon team[6]; // Une équipe de vrais Supémons
     int nb_supemons;
     int selected_supemon;   // Index du Supémon actif (0 à 5)
     int supcoins;           // Argent
@@ -143,51 +143,138 @@ int main() {
 
     p.nb_supemons = 1;
 
-    printf("+------------------------------+\n"
-           "|Where do you want to go ?     |\n"
-           "|    1 - Into the Wild         |\n"
-           "|    2 - In the shop           |\n"
-           "|    3 - In the Supemon center |\n"
-           "|    4 - Leave the game        |\n"
-           "+------------------------------+\n"
-           "1, 2, 3  or 4: ");
+    int running = 1; // Variable pour garder le jeu allumé
+    while (running) {
+        printf("\n+------------------------------+\n"
+               "|Where do you want to go ?     |\n"
+               "|    1 - Into the Wild         |\n"
+               "|    2 - In the shop           |\n"
+               "|    3 - In the Supemon center |\n"
+               "|    4 - Leave the game        |\n"
+               "+------------------------------+\n"
+               "1, 2, 3 or 4: ");
 
-    int choice2;
-    scanf("%d", &choice2);
+        int choice2;
+        scanf("%d", &choice2);
 
-    if (choice2 == 1) {
-        printf("You go into the Wild!\n");
-        printf("A savage Supemon appears !\n");
-        printf("+----------------------------+\n"
-               "|Where do you do ?           |\n"
-               "|    1 - Attack              |\n"
-               "|    2 - Change Supemon      |\n"
-               "|    3 - Use an object       |\n"
-               "|    4 - Leave the fight     |\n"
-               "|    5 - Capture the Supemon |\n"
-               "+----------------------------+\n"
-               "1, 2, 3, 4  or 5: ");
-        int battle;
-        scanf("%d", &battle);
-    }
+        if (choice2 == 1) {
+            printf("\n--- Into the Wild (Not implemented yet) ---\n");
+            // Ta logique de combat...
+        }
+        //#####################################
+        // 2 -        THE SHOP
+        //#####################################
+        if (choice2 == 2) {
+            int shop_running = 1;
+            while (shop_running) {
+                printf("\n=== WELCOME TO THE SHOP ===\n");
+                printf("Your balance: %d Supcoins\n", p.supcoins);
+                printf("1 - Buy items\n");
+                printf("2 - Sell items\n");
+                printf("3 - Leave shop\n");
+                printf("Choice: ");
+                int shop_mode;
+                scanf("%d", &shop_mode);
 
-    if (choice2 == 2) {
-        printf("You go in the Shop!\n");
-        printf("Your coins: %d\n", p.supcoins);
-        // Ici on pourra lister les objets
-    }
+                if (shop_mode == 1) {
+                    // MODE ACHAT
+                    printf("\n--- BUYING MODE ---\n");
+                    printf("1 - Potion (Heals 5 HP) : 100 Supcoins\n");
+                    printf("2 - Super Potion (Heals 10 HP) : 300 Supcoins\n");
+                    printf("3 - Rare Candy (Level up) : 700 Supcoins\n");
+                    printf("4 - Back\n");
+                    printf("Choice: ");
+                    int buy_choice;
+                    scanf("%d", &buy_choice);
 
-    if (choice2 == 3) {
-        printf("You go in the Supemon center!\n");
-        // Soin simple : remettre pv_actuel = pv_max
-        p.team[0].hp = p.team[0].max_hp;
-        printf("%s is fully healed!\n", p.team[0].name);
-    }
+                    if (buy_choice == 1 && p.supcoins >= 100) {
+                        p.potions++;
+                        p.supcoins -= 100;
+                        printf("Bought 1 Potion!\n");
+                    } else if (buy_choice == 2 && p.supcoins >= 300) {
+                        p.super_potions++;
+                        p.supcoins -= 300;
+                        printf("Bought 1 Super Potion!\n");
+                    } else if (buy_choice == 3 && p.supcoins >= 700) {
+                        p.rare_candies++;
+                        p.supcoins -= 700;
+                        printf("Bought 1 Rare Candy!\n");
+                    } else if (buy_choice == 4) {
+                        // Retour au menu shop
+                    } else {
+                        printf("Not enough money or invalid choice!\n");
+                    }
+                }
+                else if (shop_mode == 2) {
+                    // MODE VENTE (Prix d'achat / 2)
+                    printf("\n--- SELLING MODE ---\n");
+                    printf("1 - Sell Potion (Get 50 Supcoins) | You have: %d\n", p.potions);
+                    printf("2 - Sell Super Potion (Get 150 Supcoins) | You have: %d\n", p.super_potions);
+                    printf("3 - Sell Rare Candy (Get 350 Supcoins) | You have: %d\n", p.rare_candies);
+                    printf("4 - Back\n");
+                    printf("Choice: ");
+                    int sell_choice;
+                    scanf("%d", &sell_choice);
 
-    if (choice2 == 4) {
-        printf("You leave the game!\n");
+                    if (sell_choice == 1 && p.potions > 0) {
+                        p.potions--;
+                        p.supcoins += 50;
+                        printf("Sold 1 Potion.\n");
+                    } else if (sell_choice == 2 && p.super_potions > 0) {
+                        p.super_potions--;
+                        p.supcoins += 150;
+                        printf("Sold 1 Super Potion.\n");
+                    } else if (sell_choice == 3 && p.rare_candies > 0) {
+                        p.rare_candies--;
+                        p.supcoins += 350;
+                        printf("Sold 1 Rare Candy.\n");
+                    } else if (sell_choice == 4) {
+                        // Retour
+                    } else {
+                        printf("Nothing to sell or invalid choice!\n");
+                    }
+                }
+                else if (shop_mode == 3) {
+                    shop_running = 0; 
+                }
+            }
+        }
+        //#####################################
+        // 3 -    SUPEMON CENTER
+        //#####################################
+        if (choice2 == 3) {
+            printf("\n=== WELCOME TO THE SUPEMON CENTER ===\n");
+            printf("Here are your Supemons:\n");
+
+            // On affiche tous les Supémons du joueur
+            for (int i = 0; i < p.nb_supemons; i++) {
+                printf("%d - %s (HP: %d/%d)\n", i + 1, p.team[i].name, p.team[i].hp, p.team[i].max_hp);
+            }
+
+            printf("\nDo you want to heal them for free? (1: Yes / 2: No): ");
+            int heal_choice;
+            scanf("%d", &heal_choice);
+
+            if (heal_choice == 1) {
+                for (int i = 0; i < p.nb_supemons; i++) {
+                    p.team[i].hp = p.team[i].max_hp;
+                }
+                printf("All your Supemons are full HP! Good luck!\n");
+            } else {
+                printf("See you soon!\n");
+            }
+
+        }
+        //#####################################
+        // 4 -     LEAVE THE GAME
+        //#####################################
+        if (choice2 == 4) {
+            printf("Goodbye %s!\n", p.name);
+            running = 0;
+        }
     }
 
     return 0;
 }
+
 
