@@ -473,8 +473,36 @@ int main() {
                     }
                 }
                 else if (battle_choice == 2) {
-                    for (int i = 0; i < p.nb_supemons; i++) {
-                        printf("%d - %s (HP: %d/%d)\n", i + 1, p.team[i].name, p.team[i].hp, p.team[i].max_hp);
+                    printf("+-------------------------------------+\n"
+                                 "| Which Supemon do you want to send ? |\n");
+                    for (int k = 0; k < p.nb_supemons; k++) {
+                        printf("| %d - %s (HP: %d/%d) %s |\n",
+                               k + 1,
+                               p.team[k].name,
+                               p.team[k].hp,
+                               p.team[k].max_hp,
+                               (k == p.selected_supemon) ? "[ACTIVE]" : "");
+                    }
+                    printf("| %d - Back                            |\n"
+                                 "+-------------------------------------+\n", p.nb_supemons + 1);
+
+                    int new_choice;
+                    while (scanf("%d", &new_choice) != 1) {
+                        int c; while ((c = getchar()) != '\n' && c != EOF) {}
+                        printf(">> Enter a number: ");
+                    }
+                    if (new_choice >= 1 && new_choice <= p.nb_supemons) {
+                        int target_index = new_choice - 1;
+                        if (target_index == p.selected_supemon) {
+                            printf(">> %s is already fighting!\n", p.team[target_index].name);
+                        }
+                        else if (p.team[target_index].hp <= 0) {
+                            printf(">> %s is fainted and cannot fight!\n", p.team[target_index].name);
+                        }
+                        else {
+                            p.selected_supemon = target_index;
+                            printf(">> Come back %s! Go %s!\n", p.team[i].name, p.team[target_index].name);
+                        }
                     }
                 }
                 else if (battle_choice == 3) {
