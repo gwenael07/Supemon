@@ -43,15 +43,15 @@ struct Supemon {
     struct Competence moves[2];
 };
 
-// 2.3 - Structure du Joueur
+// Struture du joueur
 struct Player {
     char name[50];
-    struct Supemon team[6]; // Une équipe de vrais Supémons
+    struct Supemon team[6]; 
     int nb_supemons;
-    int selected_supemon;   // Index du Supémon actif (0 à 5)
+    int selected_supemon;  
     int supcoins;           // Argent
 
-    //
+    
     int potions;
     int super_potions;
     int rare_candies;
@@ -202,7 +202,7 @@ int main() {
     p.potions = 0;
     p.super_potions = 0;
     p.rare_candies = 0;
-    p.selected_supemon = 0; // Le premier par défaut
+    p.selected_supemon = 0; 
 
     printf("Hello and welcolme to Supemon game ! \n");
     printf("First of all, what's your name ? ");
@@ -234,11 +234,11 @@ int main() {
             printf(">> Please choose between 1 and 3.\n");
         }
         else {
-            starter_choisi = 1; // On change la variable pour sortir de la boucle
+            starter_choisi = 1; 
         }
     }
 
-    // Initialisation du Starter selon les stats données en 2.4
+    
     if (choice == 1) {
         printf("Your starter is Supmander !\n");
         struct Supemon s = { "Supmander",
@@ -256,7 +256,7 @@ int main() {
         s.moves[0] = m1;
         s.moves[1] = m2;
 
-        p.team[0] = s; // On ajoute le Supémon complet à l'équipe
+        p.team[0] = s; 
     }
 
     if (choice == 2) {
@@ -319,7 +319,7 @@ int main() {
         }
         if (choice2 < 1 || choice2 > 4) {
             printf(">> Please choose between 1 and 4.\n");
-            continue; // On recommence la boucle while(running)
+            continue; 
         }
 
         // #####################################
@@ -372,7 +372,7 @@ int main() {
                 }
                 if (battle_choice < 1 || battle_choice > 5) {
                     printf(">> Please choose between 1 and 5.\n");
-                    continue; // On recommence la boucle while(running)
+                    continue; 
                 }
 
                 if (battle_choice == 1) {
@@ -392,7 +392,7 @@ int main() {
                     }
                     if (move_idx < 1 || move_idx > 2) {
                         printf(">> Please choose between 1 and 2.\n");
-                        continue; // On recommence la boucle while(running)
+                        continue; 
                     }
                     move_idx--;
 
@@ -405,7 +405,7 @@ int main() {
                         if (degats > 0) {
 
                             int total_dmg = degats + (p.team[i].attack - enemy.defense);
-                            if (total_dmg < 1) total_dmg = 1; // Minimum 1 dégât
+                            if (total_dmg < 1) total_dmg = 1; 
 
                             enemy.hp -= total_dmg;
                             printf("| BANG! %s lose %d HP.          |\n", enemy.name, total_dmg);
@@ -435,7 +435,7 @@ int main() {
                     }
                     printf("+-----------------------------------+\n");
 
-                    // Vérification si l'ennemi est KO
+                    
                     if (enemy.hp <= 0) {
                         printf("\nVictory! %s is defeated!\n", enemy.name);
                         int add_supcoins = random_int(100,500);
@@ -464,8 +464,7 @@ int main() {
                     } else {
                         printf("%s missed the attack!\n", enemy.name);
                     }
-
-                    // Vérification si Supemon est KO
+                    
                     if (p.team[i].hp <= 0) {
                         p.team[i].hp = 0;
                         printf("\n%s fainted! You must go to the Center.\n", p.team[i].name);
@@ -517,7 +516,6 @@ int main() {
 
 
                     int item_choice;
-                    // On sécurise le scanf comme on l'a vu ensemble
                     while (scanf("%d", &item_choice) != 1) {
                         int c; while ((c = getchar()) != '\n' && c != EOF) {}
                         printf(">> Enter a number: ");
@@ -564,8 +562,40 @@ int main() {
                     }
                 }
                 else if (battle_choice == 4) {
-                    printf("You fled the battle!\n");
-                    combat = 0;
+                    int i = p.selected_supemon;
+                    float run_chance = (float)p.team[i].speed / (p.team[i].speed + enemy.speed);
+                    float jet = (float)rand() / (float)RAND_MAX;
+                    printf("You try to flee...\n");
+                    if (jet <= run_chance) {
+                        printf("Got away safely!\n");
+                        combat = 0; 
+                    } else {
+                        printf("Can't escape! The enemy blocked your way!\n");
+                    }
+                    
+                    //TOUR DE L'ENNEMI
+                    int enemy_move = rand() % 2;
+
+                    if (tentative_toucher(enemy, p.team[i])) {
+                        int e_degats = enemy.moves[enemy_move].damage;
+                        if (e_degats > 0) {
+                            int total_e_dmg = e_degats + (enemy.attack - p.team[i].defense);
+                            if (total_e_dmg < 1) total_e_dmg = 1;
+
+                            p.team[i].hp -= total_e_dmg;
+                            printf("Ouch! %s loses %d HP!\n", p.team[i].name, total_e_dmg);
+                        } else {
+                            printf("%s uses %s, but nothing happens.\n", enemy.name, enemy.moves[enemy_move].name);
+                        }
+                    } else {
+                        printf("%s missed the attack!\n", enemy.name);
+                    }
+                    
+                    if (p.team[i].hp <= 0) {
+                        p.team[i].hp = 0;
+                        printf("\n%s fainted! You must go to the Center.\n", p.team[i].name);
+                        combat = 0;
+                    }
                 }
                 else if (battle_choice == 5) {
                     printf("You throw a Supball!\n");
@@ -577,10 +607,34 @@ int main() {
                             strcpy(enemy.name, all_supemons[type].name);
                             p.team[p.nb_supemons] = enemy;
                             p.nb_supemons++;
-                            combat = 0; // Fin du combat
+                            combat = 0; 
                         } else {
                             printf("You're capture failed!\n");
                         }
+                    }
+                    
+                    //TOUR DE L'ENNEMI
+                    int enemy_move = rand() % 2;
+
+                    if (tentative_toucher(enemy, p.team[i])) {
+                        int e_degats = enemy.moves[enemy_move].damage;
+                        if (e_degats > 0) {
+                            int total_e_dmg = e_degats + (enemy.attack - p.team[i].defense);
+                            if (total_e_dmg < 1) total_e_dmg = 1;
+
+                            p.team[i].hp -= total_e_dmg;
+                            printf("Ouch! %s loses %d HP!\n", p.team[i].name, total_e_dmg);
+                        } else {
+                            printf("%s uses %s, but nothing happens.\n", enemy.name, enemy.moves[enemy_move].name);
+                        }
+                    } else {
+                        printf("%s missed the attack!\n", enemy.name);
+                    }
+                    
+                    if (p.team[i].hp <= 0) {
+                        p.team[i].hp = 0;
+                        printf("\n%s fainted! You must go to the Center.\n", p.team[i].name);
+                        combat = 0;
                     }
                 }
             }
@@ -606,7 +660,7 @@ int main() {
                 }
                 if (shop_mode < 1 || shop_mode > 3) {
                     printf(">> Please choose between 1 and 3.\n");
-                    continue; // On recommence la boucle while(running)
+                    continue;
                 }
 
                 if (shop_mode == 1) {
@@ -628,7 +682,7 @@ int main() {
                     }
                     if (buy_choice < 1 || buy_choice > 4) {
                         printf(">> Please choose between 1 and 4.\n");
-                        continue; // On recommence la boucle while(running)
+                        continue; 
                     }
 
                     if (buy_choice == 1 && p.supcoins >= 100) {
@@ -644,7 +698,7 @@ int main() {
                         p.supcoins -= 700;
                         printf("Bought 1 Rare Candy!\n");
                     } else if (buy_choice == 4) {
-                        // Retour au menu shop
+                    
                     } else {
                         printf("Not enough money or invalid choice!\n");
                     }
@@ -667,7 +721,7 @@ int main() {
                     }
                     if (sell_choice < 1 || sell_choice > 4) {
                         printf(">> Please choose between 1 and 4.\n");
-                        continue; // On recommence la boucle while(running)
+                        continue; 
                     }
 
                     if (sell_choice == 1 && p.potions > 0) {
@@ -683,7 +737,7 @@ int main() {
                         p.supcoins += 350;
                         printf("Sold 1 Rare Candy.\n");
                     } else if (sell_choice == 4) {
-                        // Retour
+                        
                     } else {
                         printf("Nothing to sell or invalid choice!\n");
                     }
@@ -699,7 +753,6 @@ int main() {
         if (choice2 == 3) {
             printf("+------------------------------------+\n"
                          "| Here are your Supemons:            |\n");
-            // On affiche tous les Supémons du joueur
             for (int i = 0; i < p.nb_supemons; i++) {
                 printf("| %d - %s (HP: %d/%d) |\n", i + 1, p.team[i].name, p.team[i].hp, p.team[i].max_hp);
             }
@@ -717,7 +770,7 @@ int main() {
             }
             if (heal_choice < 1 || heal_choice > 2) {
                 printf(">> Please choose between 1 and 2.\n");
-                continue; // On recommence la boucle while(running)
+                continue;
             }
 
             if (heal_choice == 1) {
