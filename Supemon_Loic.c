@@ -7,7 +7,7 @@
 struct Competence {
     char name[20];
     int damage;         // Dégâts de la compétence
-    char stat_effect[10]; // Quelle stat est modifiée
+    int stat_effect; // Quelle stat est modifiée
     int stat_change;    // Valeur du changement
 };
 
@@ -43,15 +43,15 @@ struct Supemon {
     struct Competence moves[2];
 };
 
-// 2.3 - Structure du Joueur
+// Struture du joueur
 struct Player {
     char name[50];
-    struct Supemon team[6]; // Une équipe de vrais Supémons
+    struct Supemon team[6]; 
     int nb_supemons;
-    int selected_supemon;   // Index du Supémon actif (0 à 5)
+    int selected_supemon;  
     int supcoins;           // Argent
 
-    // Inventaire (Liste d'objets simplifiée en compteurs pour l'instant)
+    
     int potions;
     int super_potions;
     int rare_candies;
@@ -67,8 +67,8 @@ struct Supemon supemon1 = {
     2, 2,
     2,
     {
-                {"Scratch", 3, "NONE", 0},
-                {"Growl",   0, "ATK",  1}
+                {"Scratch", 3, 0, 0},
+                {"Growl",   0, 1,  1}
     }
 };
 
@@ -81,8 +81,8 @@ struct Supemon supemon2 = {
     2, 2,
     2,
     {
-                {"Pound",   2, "NONE", 0},
-                {"Foliage", 0, "EVA",  1}
+                {"Pound",   2, 0, 0},
+                {"Foliage", 0, 3,  1}
     }
 };
 
@@ -95,8 +95,8 @@ struct Supemon supemon3 = {
     1, 1,
     2,
     {
-                {"Pound", 2, "NONE", 0},
-                {"Shell", 0, "DEF",  1}
+                {"Pound", 2, 0, 0},
+                {"Shell", 0, 2,  1}
     }
 };
 
@@ -109,8 +109,8 @@ struct Supemon supemon4 = {
     3, 3,
     3,
     {
-                {"Peck",  2, "NONE", 0},
-                {"Focus", 0, "ACC",  1}
+                {"Peck",  2, 0, 0},
+                {"Focus", 0, 4,  1}
     }
 };
 
@@ -123,8 +123,8 @@ struct Supemon supemon5 = {
     1, 1,
     1,
     {
-                {"Smash", 2, "NONE", 0},
-                {"Guard", 0, "DEF",  1}
+                {"Smash", 2, 0, 0},
+                {"Guard", 0, 2,  1}
     }
 };
 
@@ -137,8 +137,8 @@ struct Supemon supemon6 = {
     3, 3,
     2,
     {
-                {"Pulse",  2, "NONE", 0},
-                {"Focus",  0, "ACC",  1}
+                {"Pulse",  2, 0, 0},
+                {"Focus",  0, 4,  1}
     }
 };
 
@@ -148,7 +148,7 @@ struct Supemon* create_random_enemy(struct Supemon *supemon_list, int count) {
     struct Supemon *enemy = malloc(sizeof(struct Supemon));
     if (!enemy) return NULL;
 
-    *enemy = supemon_list[index]; // Copie complÃ¨te (moves inclus)
+    *enemy = supemon_list[index];
 
     return enemy;
 }
@@ -166,8 +166,74 @@ int tentative_toucher(struct Supemon attaquant, struct Supemon cible) {
     return 0;
 }
 
+int random_int(int min, int max) {
+    return (rand() % (max - min + 1)) + min;
+}
 
 
+int tentative_capture(struct Supemon target) {
+    float hp_perdu = (float)(target.max_hp - target.hp);
+    float probability = (hp_perdu / target.max_hp) - 0.5f;
+
+
+    if (probability < 0) probability = 0;
+
+    printf("[DEBUG] Capture Chance: %.1f%%\n", probability * 100);
+
+    float jet = (float)rand() / (float)RAND_MAX;
+    if (jet <= probability) return 1; // Capturé
+    return 0; // Échec
+}
+
+
+int boost_stat(int val) {
+    float new_val = val * 1.30f;
+    int integer_part = (int)new_val;
+    float decimal_part = new_val - integer_part;
+
+    if (decimal_part == 0.0f) {
+        return integer_part;
+    }
+
+    if ((rand() % 2) == 0) {
+        return integer_part;
+    } else {
+        return integer_part + 1;
+    }
+}
+
+void check_level_up(struct Supemon *s) {
+    int xp_add = 500 + (s->level - 1) * 1000;
+
+    while (s->xp >= xp_add) {
+        s->xp -= xp_add;
+        s->level++;
+
+        printf("\n*** LEVEL UP! %s is now level %d! ***\n", s->name, s->level);
+
+        // Augmentation des statistiques de 30%
+        s->max_hp = boost_stat(s->max_hp);
+        s->hp = s->max_hp;
+
+        s->attack = boost_stat(s->attack);
+        s->base_attack = s->attack;
+
+        s->defense = boost_stat(s->defense);
+        s->base_defense = s->defense;
+
+        s->evasion = boost_stat(s->evasion);
+        s->base_evasion = s->evasion;
+
+        s->accuracy = boost_stat(s->accuracy);
+        s->base_accuracy = s->accuracy;
+
+        s->speed = boost_stat(s->speed);
+
+        xp_add = 500 + (s->level - 1) * 1000;
+
+        printf("Stats increased by 30%%! HP is now %d.\n", s->max_hp);
+    }
+}
 
 int main() {
     struct Supemon *all_supemons = malloc(6*  sizeof(struct Supemon));
@@ -186,11 +252,15 @@ int main() {
     p.potions = 0;
     p.super_potions = 0;
     p.rare_candies = 0;
-    p.selected_supemon = 0; // Le premier par défaut
+    p.selected_supemon = 0; 
 
     printf("Hello and welcolme to Supemon game ! \n");
     printf("First of all, what's your name ? ");
-    scanf("%s", p.name);
+    while (scanf("%s", p.name) != 1) {
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF) { }
+        printf(">> Invalid input! Please enter a valid name: ");
+    }
     printf("Hello %s!\n", p.name);
 
     printf("+--------------------------------+\n"
@@ -202,9 +272,23 @@ int main() {
            "1, 2 or 3 : ");
 
     int choice;
-    scanf("%d", &choice);
+    int starter_choisi = 0;
+    while (starter_choisi == 0) {
+        if (scanf("%d", &choice) != 1) {
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF) { }
 
-    // Initialisation du Starter selon les stats données en 2.4
+            printf(">> Invalid input! Please enter a valid number: ");
+        }
+        else if (choice < 1 || choice > 3) {
+            printf(">> Please choose between 1 and 3.\n");
+        }
+        else {
+            starter_choisi = 1; 
+        }
+    }
+
+    
     if (choice == 1) {
         printf("Your starter is Supmander !\n");
         struct Supemon s = { "Supmander",
@@ -217,12 +301,12 @@ int main() {
                              1 };           // Speed
 
         // Définition des attaques de Supmander
-        struct Competence m1 = {"Scratch", 3, "NONE", 0};
-        struct Competence m2 = {"Grawl", 0, "ATK", 1};
+        struct Competence m1 = {"Scratch", 3, 0, 0};
+        struct Competence m2 = {"Grawl", 0, 1, 1};
         s.moves[0] = m1;
         s.moves[1] = m2;
 
-        p.team[0] = s; // On ajoute le Supémon complet à l'équipe
+        p.team[0] = s; 
     }
 
     if (choice == 2) {
@@ -236,8 +320,8 @@ int main() {
                              2 };           // Speed
 
         // Définition des attaques de Supasaur
-        struct Competence m1 = {"Pound", 2, "NONE", 0};
-        struct Competence m2 = {"Foliage", 0, "EVA", 1};
+        struct Competence m1 = {"Pound", 2, 0, 0};
+        struct Competence m2 = {"Foliage", 0, 3, 1};
         s.moves[0] = m1;
         s.moves[1] = m2;
 
@@ -255,8 +339,8 @@ int main() {
                              2 };           // Speed
 
         // Définition des attaques de Supirtle
-        struct Competence m1 = {"Pound", 2, "NONE", 0};
-        struct Competence m2 = {"Shell", 0, "DEF", 1};
+        struct Competence m1 = {"Pound", 2, 0, 0};
+        struct Competence m2 = {"Shell", 0, 2, 1};
         s.moves[0] = m1;
         s.moves[1] = m2;
 
@@ -277,115 +361,334 @@ int main() {
                "1, 2, 3 or 4: ");
 
         int choice2;
-        scanf("%d", &choice2);
+        while (scanf("%d", &choice2) != 1) {
+            int c;
+            while ((c = getchar()) != '\n' && c != EOF) { }
 
+            printf(">> Invalid input! Please enter a valid number: ");
+        }
+        if (choice2 < 1 || choice2 > 4) {
+            printf(">> Please choose between 1 and 4.\n");
+            continue; 
+        }
+
+        // #####################################
+        // 1 -        INTO THE WILD
+        // #####################################
         if (choice2 == 1) {
-            struct Supemon enemy;
-            int type = rand()%3;
-            if (type == 0) {
-                strcpy(enemy.name, "Savage Supmander");
-                enemy.hp = 10; enemy.max_hp = 10;
-                enemy.attack = 1; enemy.base_attack = 1;
-                enemy.defense = 1; enemy.base_defense = 1;
-                enemy.evasion = 1; enemy.base_evasion = 1;
-                enemy.accuracy = 2; enemy.base_accuracy = 2;
-                enemy.speed = 1;
-                }
-            if (type == 1) {
-                strcpy(enemy.name,"Savage Supasaur");
-                enemy.hp =9; enemy.max_hp = 9;
-                enemy.attack=1; enemy.base_attack =1;
-                enemy.defense = 1; enemy.base_defense = 1;
-                enemy.evasion = 3; enemy.base_evasion = 3;
-                enemy.accuracy = 2; enemy.base_accuracy = 2;
-                enemy.speed = 2;
-            }
-            if (type == 2) {
-                strcpy(enemy.name,"Savage Supirtle");
-                enemy.hp =11; enemy.max_hp = 11;
-                enemy.attack=1; enemy.base_attack =1;
-                enemy.defense = 2; enemy.base_defense = 2;
-                enemy.evasion = 2; enemy.base_evasion = 2;
-                enemy.accuracy = 1; enemy.base_accuracy = 1;
-                enemy.speed = 2;
-            }
+
+            int type = rand() % 6;
+            struct Supemon enemy = all_supemons[type];
+
+            char wild_name[50];
+            sprintf(wild_name, "Savage %s", enemy.name);
+            strcpy(enemy.name, wild_name);
+
             int combat = 1;
-            int turn_p=1;
-            printf("You go into the Wild!\n");
-            printf("A %s appears !\n", enemy.name);
-            while (combat == 1) {
-                while (turn_p==1) {
-                    printf("+----------------------------+\n"
-                                 "|Where do you do ?           |\n"
-                                 "|    1 - Attack              |\n"
-                                 "|    2 - Change Supemon      |\n"
-                                 "|    3 - Use an object       |\n"
-                                 "|    4 - Run away            |\n"
-                                 "|    5 - Capture the Supemon |\n"
-                                 "+----------------------------+\n"
-                                 "1, 2, 3, 4  or 5: ");
-                    int battle;
-                    scanf("%d", &battle);
-                    int i = p.selected_supemon;
-                    if (battle==1) {
-                        printf("+-----------------------------------+\n"
-                                     "|What attack do you want to launch? |\n"
-                                     "|     1 - %-26s|\n""|     2 - %-26s|\n"
-                                     "+-----------------------------------+\n"
-                                     "1 or 2 :", p.team[i].moves[0].name, p.team[i].moves[1].name);
-                        int attack;
-                        scanf("%d",&attack);
-                        if (attack == 1) {
-                            printf("+-----------------------------------+\n"
-                                         "|You make %-26s|\n",p.team[i].moves[0].name);
-                            if (tentative_toucher(p.team[i], enemy)) {
-                                int degats = p.team[i].moves[0].damage;
-                                enemy.hp -= degats;
-                                printf("BANG! %s lose %d HP.\n", enemy.name, degats);
-                                if (enemy.hp < 0) enemy.hp = 0;
-                                printf("Enemy HP remaining: %d/%d\n", enemy.hp, enemy.max_hp);
-                                turn_p = 0;
-                            } else {
-                                printf("| Missed! The enemy dodged it.      |\n");
-                            }
-                            printf("+-----------------------------------+\n");
-                        }
-                        if (attack == 2) {
-                            printf("+-----------------------------------+\n"
-                                         "|You make %-26s|\n",p.team[i].moves[1].name);
-                        }
-                    }
-                    if (battle==2) {
-                        printf("+---------------------------------------+\n"
-                                     "|Which Supemon would you like to trade? |\n"
-                                     "|     1 - %-30s|\n"
-                                     "+---------------------------------------+\n",p.team[i].name);
-                    }
-                    if (battle==3) {
-                        printf("+---------------------------------------+\n");
-                    }
-                    if (battle==4) {
-                        printf("+----------------------------------------+\n"
-                                     "|Are you sure you want to quit the fight?|\n"
-                                     "      1 - Yes !                          |\n"
-                                     "      2 - No !                           |\n"
-                                     "+----------------------------------------+\n"
-                                     "1 or 2 :");
-                        int leave;
-                        scanf("%d",&leave);
-                        if (leave == 1) {
+            int i = p.selected_supemon;
 
+            printf("You go into the Wild!\n");
+            printf("A %s appears!\n", enemy.name);
+
+            while (combat == 1) {
+                int i = p.selected_supemon;
+
+
+                printf("  %-20s            %-20s\n", "YOUR SUPEMON", "WILD ENEMY");
+                printf("  %-20s            %-20s\n", p.team[i].name, enemy.name);
+                printf("+--------------------------+    +--------------------------+\n");
+                printf("| HP:  %3d / %-3d          |    | HP:  %3d / %-3d          |\n", p.team[i].hp, p.team[i].max_hp, enemy.hp, enemy.max_hp);
+                printf("| ATK: %2d   DEF: %2d       |    | ATK: %2d   DEF: %2d       |\n", p.team[i].attack, p.team[i].defense, enemy.attack, enemy.defense);
+                printf("| ACC: %2d   EVA: %2d       |    | ACC: %2d   EVA: %2d       |\n", p.team[i].accuracy, p.team[i].evasion, enemy.accuracy, enemy.evasion);
+                printf("| SPD: %2d                  |    | SPD: %2d                  |\n", p.team[i].speed, enemy.speed);
+                printf("+--------------------------+    +--------------------------+\n");
+
+
+                printf("\n+----------------------------+\n"
+                       "| What do you do?            |\n"
+                       "|    1 - Attack              |\n"
+                       "|    2 - Change Supemon      |\n"
+                       "|    3 - Use an object       |\n"
+                       "|    4 - Run away            |\n"
+                       "|    5 - Capture             |\n"
+                       "+----------------------------+\n"
+                       "1, 2, 3, 4 or 5: ");
+
+                int battle_choice;
+                while (scanf("%d", &battle_choice) != 1) {
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF) { }
+                    printf(">> Invalid input! Please enter a number: ");
+                }
+                if (battle_choice < 1 || battle_choice > 5) {
+                    printf(">> Please choose between 1 and 5.\n");
+                    continue; 
+                }
+
+                if (battle_choice == 1) {
+
+                    printf("+-----------------------------------+\n"
+                           "| What attack do you want to launch?|\n"
+                           "|      1 - %-25s|\n"
+                           "|      2 - %-25s|\n"
+                           "+-----------------------------------+\n"
+                           "1 or 2 : ", p.team[i].moves[0].name, p.team[i].moves[1].name);
+
+                    int move_idx;
+                    while (scanf("%d", &move_idx) != 1) {
+                        int c;
+                        while ((c = getchar()) != '\n' && c != EOF) { }
+                        printf(">> Invalid input! Please enter a valid number: ");
+                    }
+                    if (move_idx < 1 || move_idx > 2) {
+                        printf(">> Please choose between 1 and 2.\n");
+                        continue; 
+                    }
+                    move_idx--;
+
+                    printf("+-----------------------------------+\n"
+                           "| You use %-26s|\n", p.team[i].moves[move_idx].name);
+                    if (tentative_toucher(p.team[i], enemy)) {
+                        int degats = p.team[i].moves[move_idx].damage;
+
+
+                        if (degats > 0) {
+
+                            int total_dmg = degats + (p.team[i].attack - enemy.defense);
+                            if (total_dmg < 1) total_dmg = 1; 
+
+                            enemy.hp -= total_dmg;
+                            printf("| BANG! %s lose %d HP.          |\n", enemy.name, total_dmg);
+                        } else {
+
+                            switch (p.team[i].moves[move_idx].stat_effect) {
+                                case 1:
+                                    p.team[i].attack+=p.team[i].moves[move_idx].stat_change;
+                                    printf("Attack increase by 1.\n");
+                                    break;
+                                case 2:
+                                    p.team[i].defense+=p.team[i].moves[move_idx].stat_change;
+                                    printf("Defense increase by 1.\n");
+                                    break;
+                                case 3:
+                                    p.team[i].evasion+=p.team[i].moves[move_idx].stat_change;
+                                    printf("Evasion increase by 1.\n");
+                                    break;
+                                case 4:
+                                    p.team[i].accuracy+=p.team[i].moves[move_idx].stat_change;
+                                    printf("Accuracy increase by 1.\n");
+                                    break;
+                            }
                         }
-                        if (leave == 2) {
-                            return 0;
+                    } else {
+                        printf("| Missed! The enemy dodged it.      |\n");
+                    }
+                    printf("+-----------------------------------+\n");
+
+                    
+                    if (enemy.hp <= 0) {
+                        printf("\nVictory! %s is defeated!\n", enemy.name);
+                        int add_supcoins = random_int(100,500);
+                        p.supcoins += add_supcoins;
+                        int add_xp = random_int(100,500)*enemy.level;
+                        p.team[i].xp+= add_xp;
+                        printf("You earned %d Supcoins and your supemon earned %d xp.\n",add_supcoins, add_xp);
+                        check_level_up(&p.team[i]);
+                        combat = 0;
+                        break;
+                    }
+
+                    //TOUR DE L'ENNEMI
+                    int enemy_move = rand() % 2;
+
+                    if (tentative_toucher(enemy, p.team[i])) {
+                        int e_degats = enemy.moves[enemy_move].damage;
+                        if (e_degats > 0) {
+                            int total_e_dmg = e_degats + (enemy.attack - p.team[i].defense);
+                            if (total_e_dmg < 1) total_e_dmg = 1;
+
+                            p.team[i].hp -= total_e_dmg;
+                            printf("Ouch! %s loses %d HP!\n", p.team[i].name, total_e_dmg);
+                        } else {
+                            printf("%s uses %s, but nothing happens.\n", enemy.name, enemy.moves[enemy_move].name);
+                        }
+                    } else {
+                        printf("%s missed the attack!\n", enemy.name);
+                    }
+                    
+                    if (p.team[i].hp <= 0) {
+                        p.team[i].hp = 0;
+                        printf("\n%s fainted! You must go to the Center.\n", p.team[i].name);
+                        combat = 0;
+                    }
+                }
+                else if (battle_choice == 2) {
+                    printf("+-------------------------------------+\n"
+                                 "| Which Supemon do you want to send ? |\n");
+                    for (int k = 0; k < p.nb_supemons; k++) {
+                        printf("| %d - %s (HP: %d/%d) %s |\n",
+                               k + 1,
+                               p.team[k].name,
+                               p.team[k].hp,
+                               p.team[k].max_hp,
+                               (k == p.selected_supemon) ? "[ACTIVE]" : "");
+                    }
+                    printf("| %d - Back                            |\n"
+                                 "+-------------------------------------+\n", p.nb_supemons + 1);
+
+                    int new_choice;
+                    while (scanf("%d", &new_choice) != 1) {
+                        int c; while ((c = getchar()) != '\n' && c != EOF) {}
+                        printf(">> Enter a number: ");
+                    }
+                    if (new_choice >= 1 && new_choice <= p.nb_supemons) {
+                        int target_index = new_choice - 1;
+                        if (target_index == p.selected_supemon) {
+                            printf(">> %s is already fighting!\n", p.team[target_index].name);
+                        }
+                        else if (p.team[target_index].hp <= 0) {
+                            printf(">> %s is fainted and cannot fight!\n", p.team[target_index].name);
+                        }
+                        else {
+                            p.selected_supemon = target_index;
+                            printf(">> Come back %s! Go %s!\n", p.team[i].name, p.team[target_index].name);
                         }
                     }
-                    if (battle==5) {
-                        printf("+---------------------------------------+\n");
+                }
+                else if (battle_choice == 3) {
+                    printf("+-----------------------------------+\n"
+                                 "| Your items :                      |\n"
+                                 "|     1 - Potion -> +5HP(x%d)        |\n"
+                                 "|     2 - Super Potion -> +10HP(x%d) |\n"
+                                 "|     3 - Rare Candy -> +1level(x%d) |\n"
+                                 "|     4 - Back                      |\n"
+                                 "+-----------------------------------+\n"
+                                 "1, 2, 3 or 4 :",p.potions,p.super_potions,p.rare_candies);
+
+
+                    int item_choice;
+                    while (scanf("%d", &item_choice) != 1) {
+                        int c; while ((c = getchar()) != '\n' && c != EOF) {}
+                        printf(">> Enter a number: ");
+                    }
+                    if (item_choice < 1 || item_choice > 4) {
+                        printf(">> Please choose between 1 and 4.\n");
+                        continue;
+                    }
+                    if (item_choice == 1) {
+                        if (p.potions > 0) {
+                            p.team[i].hp += 5;
+                            if (p.team[i].hp > p.team[i].max_hp) {
+                                p.team[i].hp = p.team[i].max_hp;
+                            }
+                            p.potions--;
+                            printf("You used 1 Potion ! %s feels better !\n", p.team[i].name);
+                        } else {
+                            printf("You don't have a potion !\n");
+                        }
+                    }
+                    else if (item_choice == 2) {
+                        if (p.super_potions > 0) {
+                            p.team[i].hp += 10;
+                            if (p.team[i].hp > p.team[i].max_hp) {
+                                p.team[i].hp = p.team[i].max_hp;
+                            }
+                            p.super_potions--;
+                            printf("You used 1 Super Potion ! %s feels better !\n",p.team[i].name);
+                        }else {
+                            printf("You don't have a super potion !\n");
+                        }
+                    }
+                    else if (item_choice == 3) {
+                        if (p.rare_candies > 0) {
+                            p.team[i].level += 1;
+                            p.rare_candies--;
+                            printf("You used 1 Rare Candies ! %s increase !\n", p.team[i].name);
+                        }else {
+                            printf("You don't have a rare candies !\n");
+                        }
+                    }
+                    else if (item_choice == 4) {
+
+                    }
+                }
+                else if (battle_choice == 4) {
+                    int i = p.selected_supemon;
+                    float run_chance = (float)p.team[i].speed / (p.team[i].speed + enemy.speed);
+                    float jet = (float)rand() / (float)RAND_MAX;
+                    printf("You try to flee...\n");
+                    if (jet <= run_chance) {
+                        printf("Got away safely!\n");
+                        combat = 0; 
+                    } else {
+                        printf("Can't escape! The enemy blocked your way!\n");
+                    }
+                    
+                    //TOUR DE L'ENNEMI
+                    int enemy_move = rand() % 2;
+
+                    if (tentative_toucher(enemy, p.team[i])) {
+                        int e_degats = enemy.moves[enemy_move].damage;
+                        if (e_degats > 0) {
+                            int total_e_dmg = e_degats + (enemy.attack - p.team[i].defense);
+                            if (total_e_dmg < 1) total_e_dmg = 1;
+
+                            p.team[i].hp -= total_e_dmg;
+                            printf("Ouch! %s loses %d HP!\n", p.team[i].name, total_e_dmg);
+                        } else {
+                            printf("%s uses %s, but nothing happens.\n", enemy.name, enemy.moves[enemy_move].name);
+                        }
+                    } else {
+                        printf("%s missed the attack!\n", enemy.name);
+                    }
+                    
+                    if (p.team[i].hp <= 0) {
+                        p.team[i].hp = 0;
+                        printf("\n%s fainted! You must go to the Center.\n", p.team[i].name);
+                        combat = 0;
+                    }
+                }
+                else if (battle_choice == 5) {
+                    printf("You throw a Supball!\n");
+                    if (p.nb_supemons >= 6) {
+                        printf("Team full! Cannot capture.\n");
+                    } else {
+                        if (tentative_capture(enemy)) {
+                            printf("Gotcha! %s was caught!\n", enemy.name);
+                            strcpy(enemy.name, all_supemons[type].name);
+                            p.team[p.nb_supemons] = enemy;
+                            p.nb_supemons++;
+                            combat = 0; 
+                        } else {
+                            printf("You're capture failed!\n");
+                        }
+                    }
+                    
+                    //TOUR DE L'ENNEMI
+                    int enemy_move = rand() % 2;
+
+                    if (tentative_toucher(enemy, p.team[i])) {
+                        int e_degats = enemy.moves[enemy_move].damage;
+                        if (e_degats > 0) {
+                            int total_e_dmg = e_degats + (enemy.attack - p.team[i].defense);
+                            if (total_e_dmg < 1) total_e_dmg = 1;
+
+                            p.team[i].hp -= total_e_dmg;
+                            printf("Ouch! %s loses %d HP!\n", p.team[i].name, total_e_dmg);
+                        } else {
+                            printf("%s uses %s, but nothing happens.\n", enemy.name, enemy.moves[enemy_move].name);
+                        }
+                    } else {
+                        printf("%s missed the attack!\n", enemy.name);
+                    }
+                    
+                    if (p.team[i].hp <= 0) {
+                        p.team[i].hp = 0;
+                        printf("\n%s fainted! You must go to the Center.\n", p.team[i].name);
+                        combat = 0;
                     }
                 }
             }
-
         }
         //#####################################
         // 2 -        THE SHOP
@@ -393,25 +696,45 @@ int main() {
         if (choice2 == 2) {
             int shop_running = 1;
             while (shop_running) {
-                printf("\n=== WELCOME TO THE SHOP ===\n");
-                printf("Your balance: %d Supcoins\n", p.supcoins);
-                printf("1 - Buy items\n");
-                printf("2 - Sell items\n");
-                printf("3 - Leave shop\n");
-                printf("Choice: ");
+                printf("+----------------------------------------------+\n"
+                             "| Welcolme in the Supshop ! What do you want ? |\n"
+                             "|     1 - Buy items                            |\n"
+                             "|     2 - Sell items                           |\n"
+                             "|     3 - Leave shop                           |\n"
+                             "+----------------------------------------------+\n"
+                             "1, 2 or 3 :");
                 int shop_mode;
-                scanf("%d", &shop_mode);
+                while (scanf("%d", &shop_mode) != 1) {
+                    int c;
+                    while ((c = getchar()) != '\n' && c != EOF) { }
+                    printf(">> Invalid input! Please enter a valid number: ");
+                }
+                if (shop_mode < 1 || shop_mode > 3) {
+                    printf(">> Please choose between 1 and 3.\n");
+                    continue;
+                }
 
                 if (shop_mode == 1) {
                     // MODE ACHAT
-                    printf("\n--- BUYING MODE ---\n");
-                    printf("1 - Potion (Heals 5 HP) : 100 Supcoins\n");
-                    printf("2 - Super Potion (Heals 10 HP) : 300 Supcoins\n");
-                    printf("3 - Rare Candy (Level up) : 700 Supcoins\n");
-                    printf("4 - Back\n");
-                    printf("Choice: ");
+                    printf("+---------------------------------------------------+\n"
+                                 "| What do you want to buy ?                         |\n"
+                                 "| You have %d Supcoins.                             |\n"
+                                 "|     1 - Potion (Heals 5 HP) : 100 Supcoins        |\n"
+                                 "|     2 - Super Potion (Heals 10 HP) : 300 Supcoins |\n"
+                                 "|     3 - Rare Candy (Level up) : 700 Supcoins      |\n"
+                                 "|     4 - Back                                      |\n"
+                                 "+---------------------------------------------------+\n"
+                                 "1, 2, 3 or 4 :",p.supcoins);
                     int buy_choice;
-                    scanf("%d", &buy_choice);
+                    while (scanf("%d", &buy_choice) != 1) {
+                        int c;
+                        while ((c = getchar()) != '\n' && c != EOF) { }
+                        printf(">> Invalid input! Please enter valid a number: ");
+                    }
+                    if (buy_choice < 1 || buy_choice > 4) {
+                        printf(">> Please choose between 1 and 4.\n");
+                        continue; 
+                    }
 
                     if (buy_choice == 1 && p.supcoins >= 100) {
                         p.potions++;
@@ -426,21 +749,31 @@ int main() {
                         p.supcoins -= 700;
                         printf("Bought 1 Rare Candy!\n");
                     } else if (buy_choice == 4) {
-                        // Retour au menu shop
+                    
                     } else {
                         printf("Not enough money or invalid choice!\n");
                     }
                 }
                 else if (shop_mode == 2) {
-                    // MODE VENTE (Prix d'achat / 2)
-                    printf("\n--- SELLING MODE ---\n");
-                    printf("1 - Sell Potion (Get 50 Supcoins) | You have: %d\n", p.potions);
-                    printf("2 - Sell Super Potion (Get 150 Supcoins) | You have: %d\n", p.super_potions);
-                    printf("3 - Sell Rare Candy (Get 350 Supcoins) | You have: %d\n", p.rare_candies);
-                    printf("4 - Back\n");
-                    printf("Choice: ");
+
+                    printf("+--------------------------------------------------------+\n"
+                                 "| What do you want to sell ?                             |\n"
+                                 "|     1 - Potion (Get 50 Supcoins) | You have: %d        |\n"
+                                 "|     2 - Super Potion (Get 150 Supcoins) | You have: %d |\n"
+                                 "|     3 - Rare Candy (Get 350 Supcoins) | You have: %d   |\n"
+                                 "|     4 - Back                                           |\n"
+                                 "+--------------------------------------------------------+\n"
+                                 "1, 2, 3 or 4 :",p.potions,p.super_potions,p.rare_candies);
                     int sell_choice;
-                    scanf("%d", &sell_choice);
+                    while (scanf("%d", &sell_choice) != 1) {
+                        int c;
+                        while ((c = getchar()) != '\n' && c != EOF) { }
+                        printf(">> Invalid input! Please enter a valid number: ");
+                    }
+                    if (sell_choice < 1 || sell_choice > 4) {
+                        printf(">> Please choose between 1 and 4.\n");
+                        continue; 
+                    }
 
                     if (sell_choice == 1 && p.potions > 0) {
                         p.potions--;
@@ -455,7 +788,7 @@ int main() {
                         p.supcoins += 350;
                         printf("Sold 1 Rare Candy.\n");
                     } else if (sell_choice == 4) {
-                        // Retour
+                        
                     } else {
                         printf("Nothing to sell or invalid choice!\n");
                     }
@@ -469,17 +802,27 @@ int main() {
         // 3 -    SUPEMON CENTER
         //#####################################
         if (choice2 == 3) {
-            printf("\n=== WELCOME TO THE SUPEMON CENTER ===\n");
-            printf("Here are your Supemons:\n");
-
-            // On affiche tous les Supémons du joueur
+            printf("+------------------------------------+\n"
+                         "| Here are your Supemons:            |\n");
             for (int i = 0; i < p.nb_supemons; i++) {
-                printf("%d - %s (HP: %d/%d)\n", i + 1, p.team[i].name, p.team[i].hp, p.team[i].max_hp);
+                printf("| %d - %s (HP: %d/%d) |\n", i + 1, p.team[i].name, p.team[i].hp, p.team[i].max_hp);
             }
 
-            printf("\nDo you want to heal them for free? (1: Yes / 2: No): ");
+            printf("| Do you want to heal them for free? |\n"
+                         "|     1 - Yes                        |\n"
+                         "|     2 - No                         |\n"
+                         "+------------------------------------+\n"
+                         "1 or 2:");
             int heal_choice;
-            scanf("%d", &heal_choice);
+            while (scanf("%d", &heal_choice) != 1) {
+                int c;
+                while ((c = getchar()) != '\n' && c != EOF) { }
+                printf(">> Invalid input! Please enter a valid number: ");
+            }
+            if (heal_choice < 1 || heal_choice > 2) {
+                printf(">> Please choose between 1 and 2.\n");
+                continue;
+            }
 
             if (heal_choice == 1) {
                 for (int i = 0; i < p.nb_supemons; i++) {
@@ -502,6 +845,5 @@ int main() {
 
     return 0;
 }
-
 
 
