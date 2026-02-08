@@ -185,6 +185,56 @@ int tentative_capture(struct Supemon target) {
     return 0; // Échec
 }
 
+
+int boost_stat(int val) {
+    float new_val = val * 1.30f;
+    int integer_part = (int)new_val;
+    float decimal_part = new_val - integer_part;
+
+    if (decimal_part == 0.0f) {
+        return integer_part;
+    }
+
+    if ((rand() % 2) == 0) {
+        return integer_part;
+    } else {
+        return integer_part + 1;
+    }
+}
+
+void check_level_up(struct Supemon *s) {
+    int xp_add = 500 + (s->level - 1) * 1000;
+
+    while (s->xp >= xp_add) {
+        s->xp -= xp_add;
+        s->level++;
+
+        printf("\n*** LEVEL UP! %s is now level %d! ***\n", s->name, s->level);
+
+        // Augmentation des statistiques de 30%
+        s->max_hp = boost_stat(s->max_hp);
+        s->hp = s->max_hp;
+
+        s->attack = boost_stat(s->attack);
+        s->base_attack = s->attack;
+
+        s->defense = boost_stat(s->defense);
+        s->base_defense = s->defense;
+
+        s->evasion = boost_stat(s->evasion);
+        s->base_evasion = s->evasion;
+
+        s->accuracy = boost_stat(s->accuracy);
+        s->base_accuracy = s->accuracy;
+
+        s->speed = boost_stat(s->speed);
+
+        xp_add = 500 + (s->level - 1) * 1000;
+
+        printf("Stats increased by 30%%! HP is now %d.\n", s->max_hp);
+    }
+}
+
 int main() {
     struct Supemon *all_supemons = malloc(6*  sizeof(struct Supemon));
 
@@ -760,7 +810,7 @@ int main() {
             printf("| Do you want to heal them for free? |\n"
                          "|     1 - Yes                        |\n"
                          "|     2 - No                         |\n"
-                         "+------------------------------------+"
+                         "+------------------------------------+\n"
                          "1 or 2:");
             int heal_choice;
             while (scanf("%d", &heal_choice) != 1) {
@@ -794,3 +844,4 @@ int main() {
 
     return 0;
 }
+
