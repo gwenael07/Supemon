@@ -493,6 +493,7 @@ int main() {
                         int add_xp = random_int(100,500)*enemy.level;
                         p.team[i].xp+= add_xp;
                         printf("You earned %d Supcoins and your supemon earned %d xp.\n",add_supcoins, add_xp);
+                        check_level_up(&p.team[i]);
                         combat = 0;
                         break;
                     }
@@ -844,4 +845,5 @@ int main() {
 
     return 0;
 }
+
 
